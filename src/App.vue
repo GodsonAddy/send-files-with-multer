@@ -17,19 +17,33 @@
               :state="Boolean(avatar)"
               placeholder="Choose a file or drop it here..."
               drop-placeholder="Drop file here..."
-              ref="filed"
-              @change="selectFile"
+              multiple
               accept="image/*"
             >
+              <template slot='file-name' slot-scope='{ names }'>
+                <b-badge variant='dark'> {{ names[0] }}</b-badge>
+                <b-badge v-if='names.length > 1' variant='dark' class='ml-1'>
+                  + {{ names.length - 1}} More files
+                </b-badge>
+              </template>
             </b-form-file>
           </b-form-group>
-          <div class="mt-3 mb-5">
-            Selected file: {{ avatar ? avatar.name : "" }}
-          </div>
-          <b-button type="submit" variant="primary" v-if="!loading">
+
+          <b-button
+            class='mt-5'
+            type="submit"
+            variant="primary"
+            v-if="!loading"
+          >
             Upload files
           </b-button>
-          <b-button type="submit" variant="primary" v-if="loading" disabled>
+          <b-button
+            class='mt-5'
+            type="submit"
+            variant="primary"
+            v-if="loading"
+            disabled
+          >
             <b-spinner small type="grow"></b-spinner> Loading...
           </b-button>
         </b-form>
@@ -52,14 +66,11 @@ export default {
     }
   },
   methods: {
-    selectFile () {
-      this.avatar = this.$refs.filed.files[0]
-      this.showSuccessAlert = false
-      this.showErrorAlert = false
-    },
     async onSubmit () {
       const payload = new FormData()
-      payload.append('avatar', this.avatar)
+      for (const file of this.avatar) {
+        payload.append('avatar', file, file.name)
+      }
       this.loading = true
 
       try {
